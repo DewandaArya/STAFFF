@@ -30,7 +30,7 @@ client.once('ready', async () => {
 	console.log(`Logged in as ${client.user.tag}!`);
 
 	setTimeout(() => {
-		client.channels.cache.get('1152814325644415061').send('Commands Ready!\n` listCommands `');
+		client.channels.cache.get('1179704075248476170')?.send('Commands Ready!\n` listCommands `');
 	}, 500);
 
 	(await PG(`${process.cwd()}/Events/*/*.js`)).map(async (file) => {
@@ -61,10 +61,10 @@ console.log(`Successfully Loaded ${client.commands.size} Commands`);
 
 async function createBot() {
 	const bot = await mineflayer.createBot({
-		host: 'PawanSMP.aternos.me', // minecraft server ip
+		host: 'n4.luxxy.host', // minecraft server ip
 		username: 'itzStaff', // username or email, switch if you want to change accounts
 		auth: 'offline', // for offline mode servers, you can set this to 'offline'
-		port: 28882 // only set if you need a port that isn't 25565
+		port: 20528 // only set if you need a port that isn't 25565
 		// version: false,             // only set if you need a specific version or snapshot (ie: "1.8.9" or "1.16.5"), otherwise it's set automatically
 		// password: '12345678'        // set if you want to use password-based auth (may be unreliable). If specified, the `username` must be an email
 	});
@@ -313,7 +313,7 @@ async function createBot() {
 					showLeftPants: show,
 					showLeftSleeve: show,
 					showRightSleeve: show
-				};
+				}
 			});
 		};
 };
