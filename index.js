@@ -30,22 +30,8 @@ client.once('ready', async () => {
 	console.log(`Logged in as ${client.user.tag}!`);
 
 	setTimeout(() => {
-		client.channels.cache.get('1179704075248476170')?.send('Commands Ready!\n` listCommands `');
+		client.channels.cache.get('999106325197893722')?.send('Commands Ready!\n` listCommands `');
 	}, 500);
-
-	(await PG(`${process.cwd()}/Events/*/*.js`)).map(async (file) => {
-		const event = require(file);
-
-		if (event.once) {
-			bot.once(event.name, (...args) => event.execute(...args, bot));
-		} else {
-			bot.on(event.name, (...args) => event.execute(...args, bot));
-		};
-
-		await Table.addRow(event.name, "✓ SUCCESSFUL");
-	});
-
-	console.log(Table.toString());
 });
 
 const commands = fs.readdirSync("./Commands").filter((file) => file.endsWith(".js"));
@@ -60,14 +46,28 @@ for (file of commands) {
 console.log(`Successfully Loaded ${client.commands.size} Commands`);
 
 async function createBot() {
-	const bot = await mineflayer.createBot({
-		host: 'n4.luxxy.host', // minecraft server ip
-		username: 'itzStaff', // username or email, switch if you want to change accounts
+	const bot = mineflayer.createBot({
+		host: process.env.host, // minecraft server ip
+		username: 'GamerBot', // username or email, switch if you want to change accounts
 		auth: 'offline', // for offline mode servers, you can set this to 'offline'
-		port: 20528 // only set if you need a port that isn't 25565
+		port: process.env.port // only set if you need a port that isn't 25565
 		// version: false,             // only set if you need a specific version or snapshot (ie: "1.8.9" or "1.16.5"), otherwise it's set automatically
 		// password: '12345678'        // set if you want to use password-based auth (may be unreliable). If specified, the `username` must be an email
 	});
+
+	(await PG(`${process.cwd()}/Events/*/*.js`)).map(async (file) => {
+		const event = require(file);
+
+		if (event.once) {
+			bot.once(event.name, (...args) => event.execute(...args, bot));
+		} else {
+			bot.on(event.name, (...args) => event.execute(...args, bot));
+		};
+
+		await Table.addRow(event.name, "✓ SUCCESSFUL");
+	});
+
+	console.log(Table.toString());
 
 	module.exports = bot;
 
@@ -76,19 +76,17 @@ async function createBot() {
 	bot.loadPlugin(pathfinder)
 
 	bot.once('spawn', () => {
-		mineflayerViewer(bot, { port: 28882, firstPerson: false }) // port is the
+		mineflayerViewer(bot, { port: process.env.port, firstPerson: false }); // port is the
 
 		setInterval(toggleSkin, 500);
-		
+
 		setTimeout(() => {
 			bot.setControlState('forward', true);
 			bot.setControlState('forward', false);
-		}, 500);
-
-		setTimeout(() => {
+		}, 500).then(setTimeout(() => {
 			bot.chat(`/register ${process.env.password} ${process.env.password}`);
 			bot.chat(`/login ${process.env.password}`);
-		}, 500);
+		}, 500));
 
 		const defaultMove = new Movements(bot)
 	});
@@ -132,12 +130,6 @@ async function createBot() {
 		} else if (entity.type === 'player') {
 			bot.chat(`Aww, poor ${entity.username} got hurt. Maybe you shouldn't have a ping of ${bot.players[entity.username].ping}`)
 		};
-	});
-	bot.on('entityCrouch', (entity) => {
-		bot.chat(`${entity.username}: you so sneaky.`)
-	});
-	bot.on('entityUncrouch', (entity) => {
-		bot.chat(`${entity.username}: welcome back from the land of hunchbacks.`)
 	});
 	bot.on('entitySleep', (entity) => {
 		bot.chat(`Good night, ${entity.username}`)
@@ -257,9 +249,6 @@ async function createBot() {
 			case 'pos':
 				bot.chat('i am Currently at ' + bot.entity.position.toString());
 				break
-			case 'wearing':
-				sayEquipment(username)
-				break
 			case 'yp':
 				bot.chat(`Yaw ${bot.entity.yaw}, pitch: ${bot.entity.pitch}`)
 				break
@@ -271,21 +260,6 @@ async function createBot() {
 	});
 
 	client.login(process.env.TOKEN);
-
-	function sayEquipment() {
-		const eq = bot.entity.equipment
-		const eqText = []
-		if (eq[0]) eqText.push(`holding a ${eq[0].displayName}`)
-		if (eq[1]) eqText.push(`wearing a ${eq[1].displayName} on your feet`)
-		if (eq[2]) eqText.push(`wearing a ${eq[2].displayName} on your legs`)
-		if (eq[3]) eqText.push(`wearing a ${eq[3].displayName} on your torso`)
-		if (eq[4]) eqText.push(`wearing a ${eq[4].displayName} on your head`)
-		if (eqText.length) {
-			bot.chat(`im ${eqText.join(', ')}.`)
-		} else {
-			bot.chat('imim naked!')
-		};
-	};
 
 	function itemToString(item) {
 		if (item) {
@@ -301,21 +275,21 @@ async function createBot() {
 		return items.filter(item => item.name === name)[0]
 	};
 
-		let show = true
+	let show = true
 
-		function toggleSkin () {
-			show = !show
-			bot.setSettings({
-				skinParts: {
-					showJacket: show,
-					showHat: show,
-					showRightPants: show,
-					showLeftPants: show,
-					showLeftSleeve: show,
-					showRightSleeve: show
-				}
-			});
-		};
+	function toggleSkin() {
+		show = !show
+		bot.setSettings({
+			skinParts: {
+				showJacket: show,
+				showHat: show,
+				showRightPants: show,
+				showLeftPants: show,
+				showLeftSleeve: show,
+				showRightSleeve: show
+			}
+		});
+	};
 };
 
 createBot();
